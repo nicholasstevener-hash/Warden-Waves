@@ -7,8 +7,8 @@ test('malformed and old saves are repaired without discarding earned upgrades',(
  assert.equal(s.contraband,82);assert.equal(s.bed,2);assert.equal(s.clears[0],1);assert.equal(s.batonUnlocked,true);assert.equal(R.gateOpen(s),false);
  assert.equal(R.normalize({chosenWeapon:'baton',batonPurchased:false}).chosenWeapon,'shiv');
 });
-test('three permanent lessons AND a first-floor clear are required for the gate',()=>{
- const s=R.blank();for(const id of ['damage','health','heal'])R.learn(s,id);assert.equal(R.gateOpen(s),false);s.clears[0]=1;assert.equal(R.gateOpen(s),true);s.lessons.heal=false;assert.equal(R.gateOpen(s),false);
+test('the physical door mission and a boss clear open the passage',()=>{
+ const s=R.blank();for(const id of ['damage','health','heal'])R.learn(s,id);s.clears[0]=1;assert.equal(R.gateOpen(s),false);s.story.door=true;assert.equal(R.gateOpen(s),true);s.clears[0]=0;assert.equal(R.gateOpen(s),false);
 });
 test('late-wave lesson choices are guaranteed until learned',()=>{
  const s=R.blank();for(const [w,id] of [[7,'damage'],[8,'health'],[9,'heal']]){const choices=R.choices(s,w,()=>.5);assert.equal(choices[0].id,id);assert.equal(new Set(choices.map(x=>x.id)).size,3);}
