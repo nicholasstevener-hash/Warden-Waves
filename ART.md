@@ -1,0 +1,13 @@
+# Character artwork
+
+The built-in image-generation tool produced `actors.png`, a transparent 887 × 1774 atlas of 32 illustrated poses. `sprite-atlas.json` records the measured alpha bounds; `security.js` embeds those rectangles for rendering, so no runtime metadata fetch is needed. Original vector figures remain as a fallback while the image loads.
+
+Four directions × four walking poses are provided for the prisoner and guard. The game adds visible weapons, attack lean, a dodge lean, hit flashes, stagger tilt, shadows, and falling guard poses procedurally. Charger insignia, ranged equipment and heavy armor overlays distinguish enemy roles.
+
+## Final generation prompt
+
+Use case: stylized-concept. Asset type: production 2D game character sprite atlas, not a presentation. Create ONE transparent PNG sprite sheet for a prison survival game, 4 equal columns by 8 equal rows (32 cells), edge to edge uniform grid, no lines or captions, every character completely inside its own cell with transparent padding. Tall 1:2 image. Gritty expressive hand-painted cartoon, bold dark outlines, clean readable proportions, warm rim lighting, three-quarter overhead game camera, full-body boot-to-head, exactly same camera and size every cell. Rows 1–4: same male prisoner with short dark hair, stubble, orange long-sleeve prison jumpsuit, dark boots, cream chest patch without text. Row 1 faces south/front, row 2 north/back, row 3 east/right, row 4 west/left. Rows 5–8: same stocky prison guard in dark desaturated green uniform, cap, armored vest, utility belt, black boots, no carried weapon. Row 5 south/front, row 6 north/back, row 7 east/right, row 8 west/left. Each row is a four-frame walking cycle: left foot forward, passing pose, right foot forward, passing pose. Natural separate legs and swinging arms, same face and clothing from frame to frame; feet align to same baseline within each cell; no cast shadows except a small contact shadow under boots. Characters occupy about 70% of cell height, consistent scale. Prisoner should be charismatic and vulnerable, guard intimidating. Both empty-handed because the game draws the weapon independently. No scenery, no typography, no labels, no grid borders, no checkerboard painted background, no overlapping characters. Real transparent alpha background.
+
+## Integration
+
+The generated atlas does not align perfectly to uniform grid cells, so the game uses measured per-frame bounding rectangles, with consistent row baselines. The alpha channel is preserved. All artwork is served from the same project; no third-party image service is contacted during play.
