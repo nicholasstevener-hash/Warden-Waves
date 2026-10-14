@@ -1,81 +1,58 @@
-# Warden Waves — Break the Cycle
+# Warden Waves — Chapter One: The Treatment
 
-A dependency-free browser prison survival roguelite extending the existing Warden Waves prototype. Desktop keyboard and touch movement, automatically aimed weapons, ten blocks of ten waves, bosses, journal lessons, permanent Contraband upgrades, a Perk Vault, and an escape/New Game+ loop.
+A browser prison escape survival roguelite. You wake up in Solitary without a name. Someone scratched **CHECK THE MATTRESS** into the wall. Someone else remembers you.
 
 ## Play
 
-Open `PLAY-WARDEN-WAVES.html` for the standalone build, or serve this folder:
+Published project: https://github.com/nicholasstevener-hash/Warden-Waves
 
-```sh
-python3 -m http.server 8000
-```
+Play online: https://nicholasstevener-hash.github.io/Warden-Waves/
 
-Then open http://localhost:8000. A stable HTTP/HTTPS origin is recommended for reliable browser saves. No accounts, dependencies, external fonts, analytics or network requests are required by the game.
+- WASD / arrows: move. Space: dodge. E: investigate a nearby clue. Esc: pause.
+- Phone: drag on the arena to move. Use the DODGE and context-sensitive investigation buttons.
+- Weapons attack automatically. Move away from marked circles, charge lanes, and gunner sights.
+- **Collect the drops:** diamonds grant XP, banknotes grant Contraband, bandages restore HP. Supplies stay on the floor between waves. They are never automatically awarded after a clear.
+- Picked-up Contraband is banked on capture or returning to the cell. Reloading an active attempt loses its unbanked loot and temporary powers; mission discoveries are saved immediately.
 
-- WASD / arrows: move. Space: dodge. Esc: pause.
-- Phone: drag anywhere on the arena to move; tap DODGE to evade.
-- Attacks automatically target the nearest guard.
-- Return to your cell to bank Contraband. Closing or reloading an active attempt loses that attempt's unbanked loot and temporary powers.
-- Knowledge, purchases, banked currency and boss clears save on this device. Save & settings lets you copy or restore a backup.
+For local play, serve this directory with `python3 -m http.server 8765`, then open http://localhost:8765. `PLAY-WARDEN-WAVES.html` is a standalone copy. Prefer a stable HTTP/HTTPS address for reliable save storage.
 
-## Publishing to the existing GitHub Pages site
+## First chapter
 
-Replace the existing root `index.html`, `game.js`, and `style.css`; add `core.js`. Keep all four together in the same directory on the branch served by GitHub Pages. The standalone HTML is optional; normal hosting uses `index.html`.
+1. **Check the mattress.** Cross the cell and investigate the bunk. Find instructions in your own handwriting.
+2. **The man behind the vent.** Follow the tapping to the northeast wall. Meeting the contact unlocks the Library.
+3. **A little insurance.** Reach wave 3, then search the laundry cache. Unlock the Perk Vault, store Quick Hands, and recover 15 Contraband.
+4. **Make him open it.** Bait the Baton Guard’s marked strike onto the cracked north door. Breaking it permanently reveals the service passage; defeat the guard to advance.
 
-Project home: https://github.com/nicholasstevener-hash/Warden-Waves. The browser build is served through GitHub Pages after deployment.
+New runs begin with a short story scene. The action pauses during dialogue. The journal records evidence and the current lead. The Warden has a line for your first capture. Missions and earned unlocks survive later captures.
 
-## Recovered design implemented
+## Combat and presentation changes
 
-- Death/capture returns the prisoner to the cell and resets temporary run powers.
-- Contraband purchases Bed, Workout Corner, Shiv Training, Baton Training, Library and Perk Vault upgrades.
-- First Solitary clear ends in capture. Three journal lessons plus a clear reveal a service gate; a later clear can advance through it.
-- Reaching waves 7, 8 and 9 guarantees an unlearned damage, health or healing lesson among the choices, respectively. Lessons persist on capture.
-- Damage + health lessons unlock twin shiv throws. Recovery improves later healing.
-- Every wave has a finite quota, with timed reinforcement spawning. Strong builds clear waves faster; there is no mandatory wave-duration wait.
-- Each floor ends in a boss. Telegraphs mark slams, hazards and charges; shielding bosses punish attacking outside their openings.
-- Choose to keep a build or abandon temporary powers and heal fully at floor transitions.
-- Store perks actually found in the Perk Vault at attempt end; one slot initially, two at vault level 4, three at level 8. Stored perks apply once per attempt.
-- Twenty Solitary clears unlock starting at Intake without carried powers. Permanent cell stats still apply.
-- Defeating the Warden unlocks a harder prison. Upgrades and knowledge persist.
+- Detailed canvas-drawn prisoner and guard figures: separate legs and boots, walking cycles, uniforms, faces, collars, hair/stubble, badges, visible weapons and throwing motion. No external image assets or network requests.
+- Chargers telegraph a rush; ranged guards lock their aim before firing. Their silhouettes and warning patterns differ in shape as well as color.
+- Watchlights mark a delayed strike at the prisoner’s last position. Standing still is dangerous from wave 1; movement and dodging avoid the warning circles.
+- XP pickups drive level-up choices. Free wave-clear upgrades and automatic collection have been removed. Waves follow one another after a short reinforcement delay.
+- Recognizable XP, Contraband and healing supplies, plus hit flashes and floating pickup/damage text.
+- Physical room landmarks, a persistent mission tracker, and an objective direction marker for narrow screens.
 
-## Reconciled history and implementation choices
+## Campaign and saves
 
-The older plans referred to The Yard as Floor 1 and also proposed a ten-block campaign starting at Intake. The latest repository instead starts in Solitary with three waves and the Baton Guard. This update retains that existing starting area and boss, expands it to ten waves, restores the journal gate, and orders the campaign as:
+The existing ten-block campaign remains available beyond Solitary, with boss patterns, permanent cell stats, weapon unlocks, choosing to keep or abandon a build between blocks, the twenty-clear Intake starting point, and harder prisons after the Warden.
 
-1. Solitary — Baton Guard / telegraphed area strike
-2. Intake — The Registrar / charge
-3. General Population — Block Captain / reinforcements
-4. The Yard — Watchtower Chief / projectile fans
-5. Workshops — The Foreman / armored slam
-6. Medical Wing — The Orderly / floor hazards
-7. Maximum Security — Riot Commander / armored openings
-8. Death Row — The Executioner / consecutive charges
-9. Administration — The Overseer / projectile fans
-10. Warden’s Tower — The Warden / changing patterns
+Saves continue to use `wardenWavesSave3`. Existing currency, upgrades, stored perks and boss clears are retained. Previously discovered journal gates stay open. Existing Library and Perk Vault investments remain available. New players unlock those facilities through missions; collecting damage/health/healing upgrades no longer opens the first gate by itself.
 
-The specific later boss names, encounter numbers, costs and balance are implementation choices filling gaps in the recovered plan, rather than claims that every detail was previously approved. The historical 7–9 minute first-clear target still needs real-player balance testing. This is the browser prototype; a Godot/native iOS App Store release remains future work.
-
-## Saves
-
-`wardenWavesSave3` is the current save key. On first launch it imports earned currency/upgrades from the repository's `wardenSolitarySave`, or falls back to the earlier `wardenSave2`. The old keys remain untouched until an explicit reset. A prior Solitary clear is preserved; new journal lessons must still be learned. The standalone file and hosted site may have separate save storage: use the backup feature to transfer progress.
+Copy/restore saves through Save & settings before changing devices or browser storage. The hosted site and standalone file can have separate storage. Old `wardenSolitarySave` and `wardenSave2` saves are imported when no current save exists.
 
 ## Validation
 
 ```sh
 node --check core.js
 node --check game.js
+node --check chapter.js
 node --test tests/rules.test.cjs tests/game.test.cjs
 ```
 
-Ten automated tests passed. They cover save normalization and migration, purchases, guaranteed lesson offers, permanent gate conditions, perks, vault capacity, campaign progression, all boss logic paths, capture/reward settlement, abandoning a build, escape/New Game+, pause, movement, attacks, pickups and reload persistence. The campaign test accelerates encounters to test transitions; it is not a full balance playthrough.
+Sixteen automated checks cover the story chain, proximity/wave requirements, physical door breach, mission rewards, existing-save migration, purchases, perks, no free drop collection, capture banking without duplicate rewards, all ten boss transitions, escape, pause and drawing code. A seeded real-combat simulation captures a fresh idle player in wave 1; a moving/dodging simulation survives the first 45 seconds into wave 3. These are regression checks, not a substitute for human difficulty testing.
 
-`tests/browser.cjs` contains a separate Playwright desktop/mobile check. It was **not completed** in the build environment because no browser was installed and the browser download failed. Visual layout, real-device touch input, mobile performance and overall difficulty remain unverified.
+`tests/browser.cjs` is an optional Playwright desktop/mobile smoke check. Install Playwright and Chromium, start the local server, then run `node tests/browser.cjs`. Set `WARDEN_BASE_URL` to test a different host. `CODEX_PRIMARY_RUNTIME_NODE_MODULES`, if used, points to a directory containing Playwright. Full mobile performance, touch ergonomics, later-floor balance and the historical 7–9 minute first-clear target still need player testing.
 
-To run the browser check with Node and Playwright installed:
-
-```sh
-python3 -m http.server 8765
-# In a separate terminal, point CODEX_PRIMARY_RUNTIME_NODE_MODULES at the
-# directory containing your installed playwright module, then:
-node tests/browser.cjs
-```
+This remains a browser prototype. A native Godot/iOS App Store release is future work.

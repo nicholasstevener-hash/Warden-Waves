@@ -24,7 +24,7 @@ const perks=[
  {id:'pierce',name:'Hard Point',text:'Shivs pierce one more guard; baton hits 15% harder.'},
  {id:'magnet',name:'Hidden Pockets',text:'+45 pickup radius. Gather XP and Contraband from farther away.'}
 ];
-function blank(){return {version:3,contraband:0,days:1,bed:0,workout:0,shivLevel:0,batonLevel:0,library:0,vaultLevel:0,batonUnlocked:false,batonPurchased:false,chosenWeapon:'shiv',lessons:{damage:false,health:false,heal:false},clears:Array(10).fill(0),bestFloor:0,prison:0,vault:[],vaultEnabled:true,totalKills:0};}
+function blank(){return {version:3,contraband:0,days:1,bed:0,workout:0,shivLevel:0,batonLevel:0,library:0,vaultLevel:0,batonUnlocked:false,batonPurchased:false,chosenWeapon:'shiv',lessons:{damage:false,health:false,heal:false},clears:Array(10).fill(0),bestFloor:0,prison:0,vault:[],vaultEnabled:true,totalKills:0,story:{intro:false,mattress:false,vent:false,cache:false,door:false,firstCapture:false,legacyGate:false}};}
 function normalize(raw){
  const s=blank();if(!raw||typeof raw!=='object')return s;
  for(const k of ['contraband','days','bed','workout','shivLevel','batonLevel','library','vaultLevel','bestFloor','prison','totalKills'])s[k]=Number.isFinite(raw[k])?Math.max(0,Math.floor(raw[k])):s[k];
@@ -36,23 +36,25 @@ function normalize(raw){
  s.clears=s.clears.map((_,i)=>Number.isFinite(raw.clears?.[i])?Math.max(0,Math.floor(raw.clears[i])):0);
  if(raw.clearedSolitary&&!s.clears[0])s.clears[0]=1;
  s.vault=Array.isArray(raw.vault)?[...new Set(raw.vault.filter(p=>perks.some(x=>x.id===p)))].slice(0,vaultCapacity(s)):[];
- s.vaultEnabled=raw.vaultEnabled!==false;return s;
+ s.vaultEnabled=raw.vaultEnabled!==false;for(const k of Object.keys(s.story))s.story[k]=raw.story?.[k]===true; if(!raw.story){s.story.legacyGate=s.clears[0]>0&&Object.values(s.lessons).every(Boolean);s.story.cache=s.vault.length>0||s.vaultLevel>0;s.story.vent=s.library>0;}return s;
 }
 function load(storage){
  try{const current=storage.getItem(SAVE_KEY);if(current)return normalize(JSON.parse(current));
  for(const key of ['wardenSolitarySave','wardenSave2']){const old=storage.getItem(key);if(old)return normalize(JSON.parse(old));}
  }catch(_){}return blank();
 }
-function gateOpen(s){return s.clears[0]>0&&Object.values(s.lessons).every(Boolean);}
+function gateOpen(s){return s.clears[0]>0&&(s.story.door||s.story.legacyGate);}
 function vaultCapacity(s){return s.vaultLevel>=8?3:s.vaultLevel>=4?2:1;}
+function vaultOpen(s){return s.story.cache||s.vault.length>0||s.vaultLevel>0;}
+function mission(s){if(!s.story.mattress)return {id:'mattress',title:'Check the mattress',detail:'Find the bunk across the cell. Someone scratched a message into the wall.',x:155,y:610,label:'SEARCH MATTRESS'};if(!s.story.vent)return {id:'vent',title:'The man behind the vent',detail:'Follow the voice to the northeast wall.',x:1035,y:170,label:'LISTEN AT VENT'};if(!s.story.cache)return {id:'cache',title:'A little insurance',detail:'Reach wave 3, then find your hidden package by the laundry.',x:940,y:655,label:'OPEN HIDDEN CACHE',minWave:3};if(!s.story.door)return {id:'door',title:'Make him open it',detail:'Lead the Baton Guard’s marked strike onto the cracked north door.',x:560,y:65,label:'BAIT HIS STRIKE'};return {id:'escape',title:'The service passage',detail:'Defeat the Baton Guard. The broken door is your way through.',x:560,y:65,label:'SERVICE PASSAGE'};}
 function cost(s,id){const bases={bed:20,workout:25,shivLevel:30,batonLevel:40,library:35,vaultLevel:50};return (bases[id]||Infinity)*(s[id]+1);}
-function buy(s,id){const c=cost(s,id);if(s[id]>=20||s.contraband<c||(id==='batonLevel'&&!s.batonPurchased))return false;s.contraband-=c;s[id]++;return true;}
+function buy(s,id){const c=cost(s,id);if((id==='library'&&!s.story.vent)||(id==='vaultLevel'&&!vaultOpen(s))||s[id]>=20||s.contraband<c||(id==='batonLevel'&&!s.batonPurchased))return false;s.contraband-=c;s[id]++;return true;}
 function stats(s,weapon=s.chosenWeapon){return {maxHp:100+s.bed*15,speed:205+Math.min(s.workout,15)*9,damage:weapon==='baton'?20+s.batonLevel*5:15+s.shivLevel*5,interval:weapon==='baton'?Math.max(.25,.65-s.batonLevel*.015):Math.max(.16,.45-s.shivLevel*.012),range:weapon==='baton'?96+s.batonLevel*5:470,magnet:60+s.library*6,pierce:0,weapon};}
 function applyPerk(p,id,s){switch(id){case'damage':p.damage*=1.25;break;case'health':p.maxHp+=25;p.hp=Math.min(p.maxHp,p.hp+25);break;case'heal':p.hp=Math.min(p.maxHp,p.hp+(s.lessons.heal?50:35));break;case'speed':p.speed*=1.12;break;case'haste':p.interval=Math.max(.09,p.interval*.85);break;case'range':p.range*=1.2;break;case'pierce':p.pierce++;if(p.weapon==='baton')p.damage*=1.15;break;case'magnet':p.magnet+=45;break;}}
 function learn(s,id){if(Object.hasOwn(s.lessons,id))s.lessons[id]=true;}
 function choices(s,wave,rng=Math.random){const pool=[...perks];for(let i=pool.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}const forced={7:'damage',8:'health',9:'heal'}[wave];if(forced&&!s.lessons[forced]){return [perks.find(p=>p.id===forced),...pool.filter(p=>p.id!==forced).slice(0,2)];}return pool.slice(0,3);}
 function quota(wave,floor){return 10+wave*3+floor*2;}
 function bossHealth(floor,prison){return (850+floor*320)*(1+prison*.35);}
-const api={SAVE_KEY,floors,perks,blank,normalize,load,gateOpen,vaultCapacity,cost,buy,stats,applyPerk,learn,choices,quota,bossHealth};
+const api={SAVE_KEY,floors,perks,blank,normalize,load,gateOpen,vaultCapacity,vaultOpen,mission,cost,buy,stats,applyPerk,learn,choices,quota,bossHealth};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;root.WardenRules=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
